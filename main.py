@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired, URL
-from flask_ckeditor import CKEditor, CKEditorField
+# from flask_ckeditor import CKEditor, CKEditorField
 
 
 ## Delete this code:
@@ -13,7 +13,7 @@ from flask_ckeditor import CKEditor, CKEditorField
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
-ckeditor = CKEditor(app)
+# ckeditor = CKEditor(app)
 Bootstrap(app)
 
 ##CONNECT TO DB
@@ -31,6 +31,8 @@ class BlogPost(db.Model):
     author = db.Column(db.String(250), nullable=False)
     img_url = db.Column(db.String(250), nullable=False)
 
+app.app_context().push()
+db.create_all()
 
 ##WTForm
 class CreatePostForm(FlaskForm):
@@ -44,17 +46,18 @@ class CreatePostForm(FlaskForm):
 
 @app.route('/')
 def get_all_posts():
+    posts = BlogPost.query.all()
     return render_template("index.html", all_posts=posts)
 
 
-@app.route("/post/<int:index>")
-def show_post(index):
-    requested_post = None
-    for blog_post in posts:
-        if blog_post["id"] == index:
-            requested_post = blog_post
+@app.route("/post/<int:post_id>")
+def show_post(post_id):
+    requested_post = BlogPost.query.get(post_id)
     return render_template("post.html", post=requested_post)
 
+@app.route("/edit/<int:post_id>")
+def edit_post(post_id):
+    return f"<p>Hello World {post_id}</p>"
 
 @app.route("/about")
 def about():
@@ -66,4 +69,4 @@ def contact():
     return render_template("contact.html")
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    app.run(debug=True)
